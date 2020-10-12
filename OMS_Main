@@ -1,0 +1,63 @@
+import pandas as pd
+import numpy as np
+import json
+
+class Order:
+
+# Here we build basic functions to translate Orders from Json to Python and viceversa.
+# The structure of an order is: {"Amount", "Price", "ID", "Side"}
+
+    def Jsontopy(x):
+        values = pd.DataFrame(json.loads(x))
+        values.columns = ["Amount", "Price", "ID", "Side"]
+        return values
+    
+    def Pytojson(x):
+        values = json.dumps(x)
+        return values
+        
+        
+class Trade:
+
+# Here we build basic functions to translate Trade Types from Json to Python and viceversa.
+# The structure of an order is: {"TakeOrderID", "MarketOrderID", "Amount", "Price"}
+
+    def Jsontopy(x):
+        values = pd.DataFrame(json.loads(x))
+        values.columns = ["Amount", "Price", "ID", "Side"]
+        return values
+    
+    def Pytojson(x):
+        values = json.dumps(x)
+        return values
+        
+        
+class OrderBook:
+    
+# We build in this class the basic functions to add Buy and Sell orders.
+
+# We sort the Buy orders in descending order from lower to higher price
+    
+    def BuyOrder(buyOrder, OrderBook):
+        n = len(OrderBook)
+        for i in range(n):
+            if buyOrder.Price < OrderBook.Price[i]:
+                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0)
+                break
+            elif i == n:
+                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0)
+        return OrderBook
+                
+# We sort the Sell orders in descending order from lower to higher price
+                
+    def SellOrder(sellOrder, OrderBook):
+        n = len(OrderBook)
+        for i in range(n):
+            if sellOrder.Price < OrderBook.Price[i]:
+                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0)
+                break
+            elif i == n:
+                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0)
+        return OrderBook
+        
+            
