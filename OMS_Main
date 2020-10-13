@@ -42,10 +42,10 @@ class OrderBook:
         n = len(OrderBook)
         for i in range(n):
             if buyOrder.Price < OrderBook.Price[i]:
-                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0)
+                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0, ignore_index=True)
                 break
             elif i == n:
-                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0)
+                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0, ignore_index=True)
         return OrderBook
                 
 # We sort the Sell orders in descending order from lower to higher price
@@ -54,10 +54,20 @@ class OrderBook:
         n = len(OrderBook)
         for i in range(n):
             if sellOrder.Price < OrderBook.Price[i]:
-                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0)
+                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0, ignore_index=True)
                 break
             elif i == n:
-                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0)
+                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0, ignore_index=True)
         return OrderBook
-        
+
+# Next, we build a simple function to remove a buy order from the Order book at a given index
+
+    def RemoveBuyOrder(OrderBook, i):
+        OrderBook = pd.concat([OrderBook.loc[0:i-1], OrderBook.loc[i+1:]], axis=0, ignore_index=True)
+        return OrderBook
+# We do the same to remove a sell order from the Order book at a given index
+
+    def RemoveSellOrder(OrderBook, i):
+        OrderBook = pd.concat([OrderBook.loc[0:i-1], OrderBook.loc[i+1:]], axis=0, ignore_index=True)
+        return OrderBook
             
