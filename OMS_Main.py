@@ -3,63 +3,64 @@ import numpy as np
 import json
 
 class Order:
-
-# Here we build basic functions to translate Orders from Json to Python and viceversa.
-# The structure of an order is: {"Amount", "Price", "ID", "Side"}
-
-    def Jsontopy(x):
-        values = pd.DataFrame(json.loads(x))
-        values.columns = ["Amount", "Price", "ID", "Side"]
-        return values
+    Amount = 0
+    Price = 0
+    ID = ""
+    Side = 0
+    Type = 0
     
-    def Pytojson(x):
-        values = json.dumps(x)
-        return values
-        
+# For Side: 0 = Buy Order, 1 = Sell Order
+# For Type: 0 = Market Order, 1 = Limit Order, 2 = Cancel Order
+
+    def __init__(self, amount, price, id, side, type):
+        self.Amount = amount
+        self.Price = price
+        self.ID = id
+        self.Side = side
+        self.Type = type
+
+    def printOrder(self):
+        print("Price:"  + str(self.Price) + " Amount: " + str(self.Amount) + " ID: " + str(self.ID) )
         
 class Trade:
-
-# Here we build basic functions to translate Trade Types from Json to Python and viceversa.
-# The structure of an order is: {"TakeOrderID", "MarketOrderID", "Amount", "Price"}
-
-    def Jsontopy(x):
-        values = pd.DataFrame(json.loads(x))
-        values.columns = ["Amount", "Price", "ID", "Side"]
-        return values
-    
-    def Pytojson(x):
-        values = json.dumps(x)
-        return values
-        
-        
-class OrderBook:
+    Amount = 0
+    Price = 0
+    ID = ""
+    Side = 0
     
 # We build in this class the basic functions to add Buy and Sell orders.
 
-# We sort the Buy orders in descending order from lower to higher price
-    
-    def BuyOrder(buyOrder, OrderBook):
-        n = len(OrderBook)
-        for i in range(n):
-            if buyOrder.Price < OrderBook.Price[i]:
-                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0, ignore_index=True)
-                break
-            elif i == n:
-                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0, ignore_index=True)
-        return OrderBook
-                
-# We sort the Sell orders in descending order from lower to higher price
-                
-    def SellOrder(sellOrder, OrderBook):
-        n = len(OrderBook)
-        for i in range(n):
-            if sellOrder.Price < OrderBook.Price[i]:
-                OrderBook = pd.concat([OrderBook.loc[0:i-1], buyOrder, OrderBook.loc[i:]], axis=0, ignore_index=True)
-                break
-            elif i == n:
-                OrderBook = pd.concat([OrderBook.loc[0:], buyOrder], axis=0, ignore_index=True)
-        return OrderBook
+# We sort the Buy (sell) orders in ascending (descending) order from lower (higher) to higher (lower) price
+        
+        
+class OrderBook:
 
+    BuyOrders = []
+    SellOrders = []
+
+    def BuyOrder(self, newOrder):
+        index = 0
+        if newOrder.Type == 0:
+            self.BuyOrders.insert(index, newOrder)
+        else:
+            for o in self.BuyOrders:
+                if o.Price > newOrder.Price:
+                    break
+                index += 1
+            self.BuyOrders.insert(index, newOrder)
+
+    def SellOrder(self, newOrder):
+        if newOrder.Type == 0:
+            index = len(newOrder)
+            self.SellOrders.insert(index, newOrder)
+        else:
+            index = 0
+            for o in self.SellOrders:
+                if o.Price < newOrder.Price:
+                    break
+                index += 1
+            self.SellOrders.insert(index, newOrder)
+        
 # Next, we build a simple function to remove a buy order from the Order book at a given index
 
     def RemoveBuyOrder(self, BuyOrder, i):
@@ -103,6 +104,7 @@ print("##############Testing Ends")
 #print("BuyOrders:" + str(len(orderBook.BuyOrders)))
 #for o in orderBook.BuyOrders:
 #    o.printOrder()
+
 
 # The first part of the code consisted in biulding the OrderBook. The second part of the code will be
 # devoted to the matching algorithm.
