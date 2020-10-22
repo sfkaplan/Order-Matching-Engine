@@ -6,8 +6,11 @@ class Order:
     Amount = 0
     Price = 0
     ID = ""
-    Side = 0
-    Type = 0
+    SIDE_BUY = 0
+    SIDE_SELL = 1
+    TYPE_MARKETORDER = 0
+    TYPE_LIMITORDER = 1
+    TYPE_CANCELORDER = 2
     
 # For Side: 0 = Buy Order, 1 = Sell Order
 # For Type: 0 = Market Order, 1 = Limit Order, 2 = Cancel Order
@@ -129,6 +132,7 @@ class ProcessOrder:
                 if SellOrders[o].Price < BuyOrder.Price:
                     break
                 index = index - 1
+            print(index)
             if SellOrders[index].Amount == BuyOrder.Amount:
                 orderBook.RemoveSellOrder(orderBook.SellOrders, index)
             elif SellOrders[index].Amount > BuyOrder.Amount: 
@@ -136,12 +140,12 @@ class ProcessOrder:
             else:
                 BuyOrder.Amount = BuyOrder.Amount - orderBook.SellOrders[index].Amount
                 orderBook.RemoveSellOrder(orderBook.SellOrders, index)
-                j = index
+                j = index - 1
                 while BuyOrder.Amount > 0:
                     for o in reversed(range(j)):
                         if SellOrders[o].Price < BuyOrder.Price:
                             break
-                        index = index - 1
+                        index = max(index - 1, 0)
                     if SellOrders[index].Amount == BuyOrder.Amount:
                         orderBook.RemoveSellOrder(orderBook.SellOrders, index)
                         BuyOrder.Amount = 0
@@ -184,12 +188,12 @@ class ProcessOrder:
             else:
                 SellOrder.Amount = SellOrder.Amount - orderBook.BuyOrders[index].Amount
                 orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
-                j = index
+                j = index - 1
                 while SellOrder.Amount > 0:
                     for o in reversed(range(j)):
                         if BuyOrders[o].Price > SellOrder.Price:
                             break
-                        index = index - 1
+                        index = max(index - 1, 0)
                     if BuyOrders[index].Amount == SellOrder.Amount:
                         orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
                         SellOrder.Amount = 0
