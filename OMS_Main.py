@@ -122,7 +122,7 @@ class ProcessOrder:
 
 # Buy (Sell) Market orders are processed at the best available ask(bid) price.
 
-    def ProcessBuyOrder(self, BuyOrder, SellOrders):
+    def ProcessBuyOrder(self, BuyOrder, SellOrders, m):
 # We will build functions to process limit orders and market orders. We will consider both the possibility of a 
 # fill of the entire order and a partial fill.
         if BuyOrder.Type == 1:
@@ -170,9 +170,11 @@ class ProcessOrder:
                         orderBook.RemoveSellOrder(orderBook.SellOrders, i) 
             orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
             print("Market Buy Order " + BuyOrder.ID +  " has been processed")
-       
+        else:
+            Cancel = CancelOrder()
+            Cancel.CancelBuyOrder(BuyOrder, orderBook.BuyOrders, m)
     
-    def ProcessSellOrder(self, SellOrder, BuyOrders):
+    def ProcessSellOrder(self, SellOrder, BuyOrders, m):
 # We will build functions to process limit orders and market orders. We will consider both the possibility of a 
 # fill of the entire order and a partial fill.
         if SellOrder.Type == 1:
@@ -221,28 +223,39 @@ class ProcessOrder:
                         orderBook.RemoveBuyOrder(orderBook.BuyOrders, i) 
             orderBook.RemoveSellOrder(orderBook.SellOrders, m)
             print("Market Sell Order " + SellOrder.ID +  " has been processed")
+        else:
+            Cancel = CancelOrder()
+            Cancel.CancelSellOrder(SellOrder, orderBook.SellOrders, m)
             
 class CancelOrder:
 
 # The following code is meant to process cancel buy and sell orders, both full and partial.
 
-    def CancelBuyOrder(self, BuyOrder, BuyOrders):
+    def CancelBuyOrder(self, BuyOrder, BuyOrders, m):
         for i in range(len(BuyOrders)):
-            if BuyOrders[i].ID = BuyOrder.ID:
-                if BuyOrders[i].Amount = BuyOrder.Amount:
+            if BuyOrders[i].ID == BuyOrder.ID:
+                if BuyOrders[i].Amount == BuyOrder.Amount:
+                    print("Buy Order " + BuyOrders[i].ID + " has been canceled"  )
                     orderBook.RemoveBuyOrder(orderBook.BuyOrders, i)
-                    print("Buy Order" + BuyOrders[i].ID + " has been canceled"  )
+                    orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
+                    break
                 else:
                     orderBook.BuyOrders[i].Amount = orderBook.BuyOrders[i].Amount - BuyOrder.Amount 
+                    orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
+                    break
                     
-    def CancelSellOrder(self, SellOrder, SellOrders):
+    def CancelSellOrder(self, SellOrder, SellOrders, m):
         for i in range(len(SellOrders)):
-            if SellOrders[i].ID = SellOrder.ID:
-                if SellOrders[i].Amount = SellOrder.Amount:
-                    orderBook.RemoveSellOrder(orderBook.SellOrders, i)
+            if SellOrders[i].ID == SellOrder.ID:
+                if SellOrders[i].Amount == SellOrder.Amount:
                     print("Sell Order" + SellOrders[i].ID + " has been canceled"  )
+                    orderBook.RemoveSellOrder(orderBook.SellOrders, i)
+                    orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
+                    break
                 else:
-                    orderBook.SellOrders[i].Amount = orderBook.SellOrders[i].Amount - SellOrder.Amount 
+                    orderBook.SellOrders[i].Amount = orderBook.SellOrders[i].Amount - SellOrder.Amount
+                    orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
+                    break
                     
                     
 Process = ProcessOrder()  
