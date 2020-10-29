@@ -121,8 +121,7 @@ transactionBook = []
 #for o in orderBook.BuyOrders:
 #    o.printOrder()
 
-
-# The first part of the code consisted in biulding the OrderBook. The second part of the code will be
+# The first part of the code consisted in building the OrderBook. The second part of the code will be
 # devoted to the matching algorithm.
 # We will consider 3 types of orders: market orders, limit orders and cancel orders.
 
@@ -147,58 +146,61 @@ class ProcessOrder:
                 else:
                     index = index - 1
             print(index)
-            if SellOrders[index].Amount == BuyOrder.Amount:
-                Transactions.SellTransaction(SellOrders[index], transactionBook)
-                Transactions.BuyTransaction(BuyOrder, transactionBook)
-                orderBook.RemoveSellOrder(orderBook.SellOrders, index)
-            elif SellOrders[index].Amount > BuyOrder.Amount: 
-                SellTransaction = copy.deepcopy(orderBook.SellOrders[index])
-                SellTransaction.Amount = BuyOrder.Amount
-                Transactions.SellTransaction(SellTransaction, transactionBook)
-                Transactions.BuyTransaction(BuyOrder, transactionBook)
-                orderBook.SellOrders[index].Amount = orderBook.SellOrders[index].Amount - BuyOrder.Amount    
+            if SellOrders[index].Price > BuyOrder.Price:
+                print("No Order has been processed")
             else:
-                BuyTransaction = copy.deepcopy(BuyOrder)
-                BuyTransaction.Amount = SellOrders[index].Amount
-                BuyTransaction.Price = SellOrders[index].Price
-                Transactions.SellTransaction(orderBook.SellOrders[index], transactionBook)
-                Transactions.BuyTransaction(BuyTransaction, transactionBook)
-                BuyOrder.Amount = BuyOrder.Amount - orderBook.SellOrders[index].Amount
-                orderBook.RemoveSellOrder(orderBook.SellOrders, index)
-                index = index - 1
-                while BuyOrder.Amount > 0:
-                    for o in reversed(range(index)):
-                        if SellOrders[o].Price < BuyOrder.Price:
+                if SellOrders[index].Amount == BuyOrder.Amount:
+                    Transactions.SellTransaction(SellOrders[index], transactionBook)
+                    Transactions.BuyTransaction(BuyOrder, transactionBook)
+                    orderBook.RemoveSellOrder(orderBook.SellOrders, index)
+                elif SellOrders[index].Amount > BuyOrder.Amount: 
+                    SellTransaction = copy.deepcopy(orderBook.SellOrders[index])
+                    SellTransaction.Amount = BuyOrder.Amount
+                    Transactions.SellTransaction(SellTransaction, transactionBook)
+                    Transactions.BuyTransaction(BuyOrder, transactionBook)
+                    orderBook.SellOrders[index].Amount = orderBook.SellOrders[index].Amount - BuyOrder.Amount    
+                else:
+                    BuyTransaction = copy.deepcopy(BuyOrder)
+                    BuyTransaction.Amount = SellOrders[index].Amount
+                    BuyTransaction.Price = SellOrders[index].Price
+                    Transactions.SellTransaction(orderBook.SellOrders[index], transactionBook)
+                    Transactions.BuyTransaction(BuyTransaction, transactionBook)
+                    BuyOrder.Amount = BuyOrder.Amount - orderBook.SellOrders[index].Amount
+                    orderBook.RemoveSellOrder(orderBook.SellOrders, index)
+                    index = index - 1
+                    while BuyOrder.Amount > 0:
+                        for o in reversed(range(index+1)):
+                            if SellOrders[o].Price < BuyOrder.Price:
+                                break
+                            else:
+                                index = index - 1
+                        if SellOrders[index].Price > BuyOrder.Price:
                             break
                         else:
-                            index = index - 1
-                    if SellOrders[index].Price > BuyOrder.Price:
-                        break
-                    else:
-                        if SellOrders[index].Amount == BuyOrder.Amount:
-                            Transactions.SellTransaction(Sellorders[index], transactionBook)
-                            Transactions.BuyTransaction(BuyOrder, transactionBook)
-                            orderBook.RemoveSellOrder(orderBook.SellOrders, index)
-                            BuyOrder.Amount = 0
-                        elif SellOrders[index].Amount > BuyOrder.Amount: 
-                            SellTransaction = copy.deepcopy(orderBook.SellOrders[index])
-                            SellTransaction.Amount = BuyOrder.Amount
-                            BuyTransaction = copy.deepcopy(BuyOrder)
-                            Transactions.SellTransaction(SellTransaction, transactionBook)
-                            Transactions.BuyTransaction(BuyTransaction, transactionBook)
-                            orderBook.SellOrders[index].Amount = orderBook.SellOrders[index].Amount - BuyOrder.Amount
-                            BuyOrder.Amount = 0
-                        else:
-                            BuyTransaction = copy.deepcopy(BuyOrder)
-                            BuyTransaction.Amount = SellOrders[index].Amount
-                            BuyTransaction.Price = SellOrders[index].Price
-                            Transactions.SellTransaction(orderBook.SellOrders[index], transactionBook)
-                            Transactions.BuyTransaction(BuyTransaction, transactionBook)
-                            BuyOrder.Amount = BuyOrder.Amount - orderBook.SellOrders[index].Amount
-                            orderBook.RemoveSellOrder(orderBook.SellOrders, index)
+                            if SellOrders[index].Amount == BuyOrder.Amount:
+                                Transactions.SellTransaction(Sellorders[index], transactionBook)
+                                Transactions.BuyTransaction(BuyOrder, transactionBook)
+                                orderBook.RemoveSellOrder(orderBook.SellOrders, index)
+                                BuyOrder.Amount = 0
+                            elif SellOrders[index].Amount > BuyOrder.Amount: 
+                                SellTransaction = copy.deepcopy(orderBook.SellOrders[index])
+                                SellTransaction.Amount = BuyOrder.Amount
+                                BuyTransaction = copy.deepcopy(BuyOrder)
+                                Transactions.SellTransaction(SellTransaction, transactionBook)
+                                Transactions.BuyTransaction(BuyTransaction, transactionBook)
+                                orderBook.SellOrders[index].Amount = orderBook.SellOrders[index].Amount - BuyOrder.Amount
+                                BuyOrder.Amount = 0
+                            else:
+                                BuyTransaction = copy.deepcopy(BuyOrder)
+                                BuyTransaction.Amount = SellOrders[index].Amount
+                                BuyTransaction.Price = SellOrders[index].Price
+                                Transactions.SellTransaction(orderBook.SellOrders[index], transactionBook)
+                                Transactions.BuyTransaction(BuyTransaction, transactionBook)
+                                BuyOrder.Amount = BuyOrder.Amount - orderBook.SellOrders[index].Amount
+                                orderBook.RemoveSellOrder(orderBook.SellOrders, index)
+                                index = index - 1
             if BuyOrder.Amount == 0:
                 orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
-            print("Limit Buy Order " + BuyOrder.ID +  " has been processed")
         elif BuyOrder.Type == 0:
             while BuyOrder.Amount > 0:
                 for i in reversed(range(len(SellOrders))):
@@ -242,56 +244,62 @@ class ProcessOrder:
                 else:
                     index = index - 1 
             print(index)
-            if BuyOrders[index].Amount == SellOrder.Amount:
-                Transactions.BuyTransaction(BuyOrders[index], transactionBook)
-                Transactions.SellTransaction(SellOrder, transactionBook)
-                orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
-            elif BuyOrders[index].Amount > SellOrder.Amount: 
-                BuyTransaction = copy.deepcopy(orderBook.BuyOrders[index])
-                BuyTransaction.Amount = SellOrder.Amount
-                SellTransaction = copy.deepcopy(SellOrder)
-                Transactions.BuyTransaction(BuyTransaction, transactionBook)
-                Transactions.SellTransaction(SellTransaction, transactionBook)
-                orderBook.BuyOrders[index].Amount = orderBook.BuyOrders[index].Amount - SellOrder.Amount
+            if BuyOrders[index].Price < SellOrder.Price:
+                print("No Order has been processed")
             else:
-                SellTransaction = copy.deepcopy(SellOrder)
-                SellTransaction.Amount = BuyOrders[index].Amount
-                SellTransaction.Price = BuyOrders[index].Price
-                Transactions.BuyTransaction(orderBook.BuyOrders[index], transactionBook)
-                Transactions.SellTransaction(SellTransaction, transactionBook)
-                SellOrder.Amount = SellOrder.Amount - orderBook.BuyOrders[index].Amount
-                orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
-                j = index
-                while SellOrder.Amount > 0:
-                    for o in range(j,n):
-                        if BuyOrders[o].Price > SellOrder.Price:
+                if BuyOrders[index].Amount == SellOrder.Amount:
+                    Transactions.BuyTransaction(BuyOrders[index], transactionBook)
+                    Transactions.SellTransaction(SellOrder, transactionBook)
+                    orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
+                elif BuyOrders[index].Amount > SellOrder.Amount: 
+                    BuyTransaction = copy.deepcopy(orderBook.BuyOrders[index])
+                    BuyTransaction.Amount = SellOrder.Amount
+                    SellTransaction = copy.deepcopy(SellOrder)
+                    Transactions.BuyTransaction(BuyTransaction, transactionBook)
+                    Transactions.SellTransaction(SellTransaction, transactionBook)
+                    orderBook.BuyOrders[index].Amount = orderBook.BuyOrders[index].Amount - SellOrder.Amount
+                else:
+                    SellTransaction = copy.deepcopy(SellOrder)
+                    SellTransaction.Amount = BuyOrders[index].Amount
+                    SellTransaction.Price = BuyOrders[index].Price
+                    Transactions.BuyTransaction(orderBook.BuyOrders[index], transactionBook)
+                    Transactions.SellTransaction(SellTransaction, transactionBook)
+                    SellOrder.Amount = SellOrder.Amount - orderBook.BuyOrders[index].Amount
+                    orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
+                    index = index - 1
+                    while SellOrder.Amount > 0:
+                        for o in reversed(range(index+1)):
+                            if BuyOrders[o].Price > SellOrder.Price:
+                                break
+                            else:
+                                index = index - 1
+                        if BuyOrders[index].Price < SellOrder.Price:
                             break
                         else:
-                            index = index - 1
-                    if BuyOrders[index].Amount == SellOrder.Amount:
-                        Transactions.SellTransaction(SellOrder, transactionBook)
-                        Transactions.BuyTransaction(BuyOrders[index], transactionBook)
-                        orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
-                        SellOrder.Amount = 0
-                    elif BuyOrders[index].Amount > SellOrder.Amount: 
-                        BuyTransaction = copy.deepcopy(orderBook.BuyOrders[index])
-                        BuyTransaction.Amount = SellOrder.Amount
-                        SellTransaction = copy.deepcopy(SellOrder)
-                        Transactions.BuyTransaction(BuyTransaction, transactionBook)
-                        Transactions.SellTransaction(SellTransaction, transactionBook)
-                        orderBook.BuyOrders[index].Amount = orderBook.BuyOrders[index].Amount - SellOrder.Amount 
-                        SellOrder.Amount = 0
-                    else:
-                        SellTransaction = copy.deepcopy(SellOrder)
-                        SellTransaction.Amount = BuyOrders[index].Amount
-                        SellTransaction.Price = BuyOrders[index].Price
-                        Transactions.BuyTransaction(orderBook.BuyOrders[index], transactionBook)
-                        Transactions.SellTransaction(SellTransaction, transactionBook)
-                        SellOrder.Amount = SellOrder.Amount - orderBook.BuyOrders[index].Amount
-                        orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
+                            if BuyOrders[index].Amount == SellOrder.Amount:
+                                Transactions.SellTransaction(SellOrder, transactionBook)
+                                Transactions.BuyTransaction(BuyOrders[index], transactionBook)
+                                orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
+                                SellOrder.Amount = 0
+                            elif BuyOrders[index].Amount > SellOrder.Amount: 
+                                BuyTransaction = copy.deepcopy(orderBook.BuyOrders[index])
+                                BuyTransaction.Amount = SellOrder.Amount
+                                SellTransaction = copy.deepcopy(SellOrder)
+                                Transactions.BuyTransaction(BuyTransaction, transactionBook)
+                                Transactions.SellTransaction(SellTransaction, transactionBook)
+                                orderBook.BuyOrders[index].Amount = orderBook.BuyOrders[index].Amount - SellOrder.Amount 
+                                SellOrder.Amount = 0
+                            else:
+                                SellTransaction = copy.deepcopy(SellOrder)
+                                SellTransaction.Amount = BuyOrders[index].Amount
+                                SellTransaction.Price = BuyOrders[index].Price
+                                Transactions.BuyTransaction(orderBook.BuyOrders[index], transactionBook)
+                                Transactions.SellTransaction(SellTransaction, transactionBook)
+                                SellOrder.Amount = SellOrder.Amount - orderBook.BuyOrders[index].Amount
+                                orderBook.RemoveBuyOrder(orderBook.BuyOrders, index)
+                                index = index - 1
             if SellOrder.Amount == 0:
-                orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
-            print("Limit Buy Order " + BuyOrder.ID +  " has been processed")
+                orderBook.RemoveSellOrder(orderBook.SellOrders, m)
         elif SellOrder.Type == 0:
             while SellOrder.Amount > 0:
                 for i in range(len(BuyOrders)):
