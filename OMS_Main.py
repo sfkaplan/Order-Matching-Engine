@@ -153,10 +153,11 @@ class ProcessOrderAllocation:
                 alloc = []
                 alloc.append(SellOrders[index])
                 for o in reversed(range(index)):
-                    if SellOrders[o].Price == BuyOrder.Price:
+                    if SellOrders[o].Price == SellOrders[index].Price:
                         alloc.append(SellOrders[o])
                     else:
                         break
+                print(len(alloc))
                 if len(alloc) == 1:
                     if SellOrders[index].Amount == BuyOrder.Amount:
                         Transactions.SellTransaction(SellOrders[index], transactionBook)
@@ -239,24 +240,28 @@ class ProcessOrderAllocation:
                         pro_rata_sum = sum(pro_rata_sum)
                         for i in range(1,len(alloc)):
                             pro_rata_rates.append(alloc[i].Amount/pro_rata_sum)
+                        print(pro_rata_rates)
                         for i in range(len(alloc)-1):
                             pro_rata_amounts.append(int(pro_rata_rates[i]*BuyOrder.Amount))
                         BuyTransaction2 = copy.deepcopy(BuyOrder)
                         BuyTransaction2.Amount = BuyOrder.Amount
-                        BuyTransaction2.Price = SellOrders[index+1].Price
+                        BuyTransaction2.Price = SellOrders[index-1].Price
+                        SellTransactionMat = []
+                        TransactionAmount = []
                         for i in range(1,len(alloc)):
-                            SellTransactionaux = copy.deepcopy(orderBook.SellOrders[index+i])
+                            SellTransactionaux = copy.deepcopy(orderBook.SellOrders[index-i])
                             SellTransactionaux.Amount = pro_rata_amounts[i-1]
                             SellTransactionMat.append(SellTransactionaux)
+                            TransactionAmount.append(SellTransactionaux.Amount)
                         for i in range(len(alloc)-1):
                             Transactions.SellTransaction(SellTransactionMat[i], transactionBook)
                         for i in range(1,len(alloc)):
-                                orderBook.SellOrders[index+i].Amount = orderBook.SellOrders[index+i].Amount - SellTransactionMat[i-1].Amount 
-                        if sum(SellTransactionMat) < BuyTransaction2.Amount:
+                                orderBook.SellOrders[index-i].Amount = orderBook.SellOrders[index-i].Amount - SellTransactionMat[i-1].Amount 
+                        if sum(TransactionAmount) < int(BuyTransaction2.Amount):
                             SellTransactionaux2 = copy.deepcopy(SellTransactionMat[0])
-                            SellTransactionaux2. Amount = BuyTransaction2.Amount - sum(SellTransactionMat)
+                            SellTransactionaux2.Amount = BuyTransaction2.Amount - sum(TransactionAmount)
                             Transactions.SellTransaction(SellTransactionaux2, transactionBook)
-                            orderBook.SellOrders[index+1].Amount = orderBook.SellOrders[index+1].Amount - SellTransactionaux2. Amount 
+                            orderBook.SellOrders[index-1].Amount = orderBook.SellOrders[index-1].Amount - SellTransactionaux2. Amount 
                         Transactions.BuyTransaction(BuyTransaction2, transactionBook)
                         orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
             if BuyOrder.Amount == 0:
@@ -377,7 +382,8 @@ class ProcessOrderAllocation:
         else:
             Cancel = CancelOrder()
             Cancel.CancelSellOrder(SellOrder, orderBook.SellOrders, m)
-
+            
+            
 class ProcessOrderFifo:
     
 # Considering that the buy (sell) orderbook is ordered in ascending (descending) order, we build the matching algorithm
