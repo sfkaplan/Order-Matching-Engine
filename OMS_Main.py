@@ -239,9 +239,26 @@ class ProcessOrderAllocation:
                         pro_rata_sum = sum(pro_rata_sum)
                         for i in range(1,len(alloc)):
                             pro_rata_rates.append(alloc[i].Amount/pro_rata_sum)
-                        for i in range(1,len(alloc)):
+                        for i in range(len(alloc)-1):
                             pro_rata_amounts.append(int(pro_rata_rates[i]*BuyOrder.Amount))
-                        index = index - 1
+                        BuyTransaction2 = copy.deepcopy(BuyOrder)
+                        BuyTransaction2.Amount = BuyOrder.Amount
+                        BuyTransaction2.Price = SellOrders[index+1].Price
+                        for i in range(1,len(alloc)):
+                            SellTransactionaux = copy.deepcopy(orderBook.SellOrders[index+i])
+                            SellTransactionaux.Amount = pro_rata_amounts[i-1]
+                            SellTransactionMat.append(SellTransactionaux)
+                        for i in range(len(alloc)-1):
+                            Transactions.SellTransaction(SellTransactionMat[i], transactionBook)
+                        for i in range(1,len(alloc)):
+                                orderBook.SellOrders[index+i].Amount = orderBook.SellOrders[index+i].Amount - SellTransactionMat[i-1].Amount 
+                        if sum(SellTransactionMat) < BuyTransaction2.Amount:
+                            SellTransactionaux2 = copy.deepcopy(SellTransactionMat[0])
+                            SellTransactionaux2. Amount = BuyTransaction2.Amount - sum(SellTransactionMat)
+                            Transactions.SellTransaction(SellTransactionaux2, transactionBook)
+                            orderBook.SellOrders[index+1].Amount = orderBook.SellOrders[index+1].Amount - SellTransactionaux2. Amount 
+                        Transactions.BuyTransaction(BuyTransaction2, transactionBook)
+                        orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
             if BuyOrder.Amount == 0:
                 orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
         elif BuyOrder.Type == 0:
