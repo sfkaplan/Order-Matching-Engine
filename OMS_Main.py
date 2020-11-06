@@ -228,6 +228,8 @@ class ProcessOrderAllocation:
                         BuyTransaction = copy.deepcopy(BuyOrder)
                         BuyTransaction.Amount = SellOrders[index].Amount
                         BuyTransaction.Price = SellOrders[index].Price
+                        ExecutionReport(BuyTransaction, BuyOrder.Amount)
+                        ExecutionReport(SellOrders[index], SellOrders[index].Amount)
                         Transactions.SellTransaction(orderBook.SellOrders[index], transactionBook)
                         Transactions.BuyTransaction(BuyTransaction, transactionBook)
                         BuyOrder.Amount = BuyOrder.Amount - orderBook.SellOrders[index].Amount
@@ -606,6 +608,51 @@ class CancelOrder:
                     orderBook.SellOrders[i].Amount = orderBook.SellOrders[i].Amount - SellOrder.Amount
                     orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
                     break
+                    
+import xml.etree.ElementTree as ET
+import time
+
+def ExecutionReport(order, OrderQty):
+    ExecutionReportMessage = ET.Element('ExecutionReport')
+    BeginString = ET.SubElement(ExecutionReportMessage, 'BeginString')
+    BeginString.text = 'FIX Latest'
+    BodyLength = ET.SubElement(ExecutionReportMessage, 'BodyLength')
+    BodyLength.text = str(len(mydata))
+    MsgType = ET.SubElement(ExecutionReportMessage, 'MsgType')
+    MsgType.text = '8'
+    SenderCompID = ET.SubElement(ExecutionReportMessage, 'SenderCompID')
+    SenderCompID.text = 'SERVER'
+    TargetCompID = ET.SubElement(ExecutionReportMessage, 'TargetCompID')
+    TargetCompID.text = 'CLIENT'
+    MsgSeqNum = ET.SubElement(ExecutionReportMessage, 'MsgSeqNum')
+    MsgSeqNum.text = ' '
+    SendingTime = ET.SubElement(ExecutionReportMessage, 'SendingTime')
+    current_time = time.asctime( time.localtime(time.time()) )
+    SendingTime.text = str(current_time)
+    OrderID = ET.SubElement(ExecutionReportMessage, 'OrderID')
+    OrderID.text = str(order.ID)
+    ExecType = ET.SubElement(ExecutionReportMessage, 'ExecType' )
+    ExecType.text = 'Trade'
+    if OrderQty - order.Amount > 0:
+        OrdStatus = ET.SubElement(ExecutionReportMessage, 'OrdStatus')
+        OrdStatus.text = 'Partially Filled'
+    else:
+        OrdStatus = ET.SubElement(ExecutionReportMessage, 'OrdStatus' )
+        OrdStatus.text = 'Filled'
+    if order.Side == 0:
+        Side = ET.SubElement(ExecutionReportMessage, 'Side' )
+        Side.text = 'Buy'
+    else:
+        Side = ET.SubElement(ExecutionReportMessage, 'Side' )
+        Side.text = 'Sell'
+    LeavesQty = ET.SubElement(ExecutionReportMessage, 'LeavesQty')
+    LeavesQty.text = str(OrderQty - order.Amount)
+    CumQty = ET.SubElement(ExecutionReportMessage, 'CumQty')
+    CumQty.text = str(order.Amount)
+    
+    mydata = ET.tostring(ExecutionReportMessage)
+    myfile = open("ExecutionReport " + str(order.ID) + ".xml", "wb")
+    myfile.write(mydata)
                     
                     
 Process = ProcessOrder()  
