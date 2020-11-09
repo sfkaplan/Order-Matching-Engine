@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import copy
+import xml.etree.ElementTree as ET
+import time, datetime
 
 class Order:
     Amount = 0
@@ -416,8 +418,6 @@ class CancelOrder:
                     orderBook.RemoveBuyOrder(orderBook.BuyOrders, m)
                     break
                     
-import xml.etree.ElementTree as ET
-import time
 
 def ExecutionReport(order, OrderQty):
     ExecutionReportMessage = ET.Element('ExecutionReport')
